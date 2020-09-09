@@ -5,24 +5,6 @@ library(ggrepel)
 library(pheatmap)
 library(gridExtra)
 library(limma)
-library(LipidMS)
-library(LipidMSdata)
-
-
-
-fas <- c("8:0", "10:0", "12:0", "14:0", "14:1", "15:0", "16:0", "16:1",
-         "17:0", "18:0", "18:1", "18:2", "18:3", "18:4", "20:0", "20:1", "20:2",
-         "20:3", "20:4", "20:5", "22:0", "22:1", "22:2", "22:3", "22:4", "22:5",
-         "22:6", "24:0", "24:1", "26:0")
-sph <- c("16:0", "16:1", "18:0", "18:1")
-dbs <- createLipidDB(lipid = "all", chains = fas, chains2 = sph)
-
-tb <- dbs[[1]]
-for (i in 2:length(dbs)) {
-        
-        
-        tb <- rbind(tb, dbs[[2]])
-}
 
 # Importing metabolite annotation 
 anno <- rbind(fread("positive_lipid.txt"),
@@ -31,7 +13,7 @@ anno <- rbind(fread("positive_lipid.txt"),
 names(anno) <- str_replace_all(colnames(anno), " ", "_")
 
 
-inner_join(tb, anno, by = c("Mass" = "mass_spectrum"))
+
 ############################################ Data Cleaning ############################################ 
 
 
@@ -303,7 +285,7 @@ LFC_NestedSigTable <- LFC_NestedTable %>%
         mutate(data = map(data, ~ filter(.x, Change != "Insignificant")),
                data = map(data, ~ arrange(.x, desc(logFC))))
 
-LFC_NestedSigTable$data[[1]]$KEGG_ID
+LFC_NestedSigTable$data[[1]]
 
 ###################################### Dimensionality Reduction & Clustering ###################################### 
 

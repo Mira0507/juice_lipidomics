@@ -61,7 +61,7 @@ PCA_hClustering_Plot <- as.data.frame(pca$x[,1:2]) %>%
         ggplot(aes(x = PC1, 
                    y = PC2, 
                    color = hClustering)) + 
-        geom_point(alpha = 0.5, size = 2) + 
+        geom_point(size = 2) + 
         theme_bw() + 
         ggtitle("PCA and Hierarchical Clustering")
 
@@ -117,6 +117,6 @@ tSNE_hClustering_Plot <- tSNE_df %>%
         ggplot(aes(x = Dim1, 
                    y = Dim2, 
                    color = hClustering)) + 
-        geom_point(alpha = 0.5, size = 2) + 
+        geom_point(size = 2) + 
         theme_bw() + 
         ggtitle("tSNE and Hierarchical Clustering")

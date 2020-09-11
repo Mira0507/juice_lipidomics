@@ -121,6 +121,9 @@ sum(is.infinite(rowMeans(exprs(eset))))
 
 ############################################ Sample Inspection ############################################
 
+# MA plot
+plotMD(eset)
+
 # Normalized count heatmap 
 pheatmap(exprs(eset),
          annotation = select(pData(eset), Group),
@@ -129,7 +132,8 @@ pheatmap(exprs(eset),
 # Normalized count MDS plot
 plotMDS(eset, 
         labels = pData(eset)[, "Group"],
-        main = "Principal Component Analysis")
+        col = as.numeric(pData(eset)[, "Group"]),
+        main = "Multidimensional Scaling (MDS) plot")
 
 # Correlation heatmap
 CorMat <- cor(exprs(eset))
@@ -248,11 +252,12 @@ VolcanoPlots <- grid.arrange(LFC_NestedTable$volcano[[1]],
                              ncol = 1)
 
 # Effect of apple or cranberry juice in metabolite change 
-limma_test <- as.data.frame(summary(decideTests(fit2)))
-names(limma_test) <- c("Change", "Contrast", "Metabolite_Number")
+limma_test1 <- decideTests(fit2)
+limma_test2 <- as.data.frame(summary(limma_test1))
+names(limma_test2) <- c("Change", "Contrast", "Metabolite_Number")
 
 # plotting 
-MetaboliteNumber_plot <- limma_test[1:6, ] %>%
+MetaboliteNumber_plot <- limma_test2[1:6, ] %>%
         
         # data cleaning
         mutate(Contrast = str_replace_all(Contrast, "Effect_", ""),
@@ -278,7 +283,8 @@ MetaboliteNumber_plot <- limma_test[1:6, ] %>%
         
           
 
-
+vennDiagram(limma_test1,
+            main = "Number of Significantly Changed Metabolites")
 
 
 LFC_NestedSigTable <- LFC_NestedTable %>%

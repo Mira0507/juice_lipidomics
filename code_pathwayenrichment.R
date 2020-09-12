@@ -129,7 +129,7 @@ PathwayDataCleaning_fn <- function(dt) {
 KEGGPath_Apple <- PathwayDataCleaning_fn(PathwayRes_Apple[[1]])
 KEGGPath_Cranberry <- PathwayDataCleaning_fn(PathwayRes_Cranberry[[1]])
 
-formattable(KEGGPath_Apple)
+PathTable_Apple <- formattable(KEGGPath_Apple)
 formattable(KEGGPath_Cranberry) # There is no pathway significantly found (p <= 0.05)
 
 #################### pathview

@@ -12,24 +12,24 @@ names(anno) <- str_replace_all(colnames(anno), " ", "_")
 
 
 # Creating count data frame
-esiPN <- rbind(fread("ST000292_AN000466_ESI_POSITIVE_mwTab.txt"),
+Omu_esiPN <- rbind(fread("ST000292_AN000466_ESI_POSITIVE_mwTab.txt"),
                fread("ST000292_AN000467_ESI_NEGATIVE_mwTAB.txt"))[-1, ] 
 
-esiPN <- esiPN[!duplicated(esiPN$Samples),]
+Omu_esiPN <- Omu_esiPN[!duplicated(Omu_esiPN$Samples),]
 
-esiPN <- cbind(esiPN[, 1], 
-               apply(esiPN[, -1], 2, as.numeric) + 0.1)
+Omu_esiPN <- cbind(Omu_esiPN[, 1], 
+               apply(Omu_esiPN[, -1], 2, as.numeric) + 0.1)
 
-esiPN1 <- right_join(anno[, c("metabolite_name", "KEGG_ID")], 
-                     esiPN, 
+Omu_esiPN1 <- right_join(anno[, c("metabolite_name", "KEGG_ID")], 
+                         Omu_esiPN, 
                      by = c("metabolite_name" = "Samples")) %>%
         filter(!is.na(KEGG_ID), KEGG_ID != "") %>% 
         rename(Metabolite = metabolite_name,
                KEGG = KEGG_ID)
-esiPN2 <- esiPN1[!duplicated(esiPN1$Metabolite),]
+Omu_esiPN2 <- Omu_esiPN1[!duplicated(Omu_esiPN1$Metabolite),]
 
 # Creating meta data
-Meta <- data.table(Sample = colnames(esiPN2[, -c(1, 2)])) %>%
+Meta <- data.table(Sample = colnames(Omu_esiPN2[, -c(1, 2)])) %>%
         mutate(Group = case_when(str_detect(Sample, "a") ~ "Apple_Juice",
                                  str_detect(Sample, "b") ~ "Control",
                                  str_detect(Sample, "c") ~ "Cranberry_Juice"),
@@ -39,7 +39,7 @@ Meta <- data.table(Sample = colnames(esiPN2[, -c(1, 2)])) %>%
                                          "Cranberry_Juice")))
 
 # Hierarchical class data 
-DF <- assign_hierarchy(count_data = esiPN2,
+DF <- assign_hierarchy(count_data = Omu_esiPN2,
                        keep_unknowns = TRUE,
                        identifier = "KEGG")
 

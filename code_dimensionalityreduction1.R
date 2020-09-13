@@ -1,6 +1,6 @@
 ###################################### Dimensionality Reduction & Clustering ###################################### 
-
-
+library(ggfortify)
+library(cluster)
 
 ################### PCA
 library(factoextra)
@@ -17,10 +17,10 @@ fviz_pca_var(pca,
              repel = TRUE, 
              title = "PCA")
 
-fviz_pca_biplot(pca, 
-                repel = TRUE,
-                geom.ind = "point",
-                title = "PCA")
+Biplot <- fviz_pca_biplot(pca, 
+                          repel = TRUE,
+                          geom.ind = "point",
+                          title = "Biplot")
 
 
 # Computing cumulative proportion of var explained
@@ -46,25 +46,32 @@ PCA_Scree <- ggplot(pca_dt, aes(x = Principal_Component,
                    size = 1)
 
 # heatmap
-pheatmap(pca$x[,1:2], 
-         main = "PCA-heatmap")
+PCA_Heatmap <- pheatmap(pca$x[,1:2], 
+                        main = "PCA-heatmap")
 
 # Hierarcical Clustering
 PCA_hclustering <- cutree(hclust(dist(pca$x[,1:2]), 
                                  method = "average"),
-                          k = 3)
+                          k = 2)
+
+
+# Data Cleaning
+set.seed(490)
+PCA_kmclustering_dt <- as.data.frame(pca$x[,1:2]) %>%
+        rownames_to_column(var = "Metabolite") %>%
+        mutate(PCA_kmClustering = factor(kmeans(pca$x[,1:2], 
+                                               centers = 2)$cluster)) 
+        
+        
 
 #Plotting
-PCA_hClustering_Plot <- as.data.frame(pca$x[,1:2]) %>%
-        rownames_to_column(var = "Metabolite") %>%
-        mutate(hClustering = factor(PCA_hclustering)) %>%
-        ggplot(aes(x = PC1, 
-                   y = PC2, 
-                   color = hClustering)) + 
-        geom_point(size = 2) + 
+set.seed(490)
+PCA_kmClustering_Plot <- 
+        autoplot(stats::kmeans(PCA_kmclustering_dt[, 2:3], 2),
+                 data = PCA_kmclustering_dt,
+                 frame = TRUE) +
         theme_bw() + 
-        ggtitle("PCA and Hierarchical Clustering")
-
+        ggtitle("PCA and K-Means Clustering") 
 
 ################### t-SNE 
 
@@ -84,6 +91,7 @@ tSNE_fn <- function(dt, pp) {
 
 tSNE_pp5 <- tSNE_fn(SigMetabolites, 5)
 tSNE_pp7 <- tSNE_fn(SigMetabolites, 7)
+tSNE_pp10 <- tSNE_fn(SigMetabolites, 10)
 
 
 
@@ -93,30 +101,68 @@ plot(x = tSNE_pp5$Y[, 1],
 plot(x = tSNE_pp7$Y[, 1],  # perplexity = 7 seems the best 
      y = tSNE_pp7$Y[, 2])
 
+plot(x = tSNE_pp10$Y[, 1],  
+     y = tSNE_pp10$Y[, 2])
+
 
 # heatmap
 tsne7DT <- tSNE_pp7$Y
 colnames(tsne7DT) <- c("Dim_1", "Dim_2")
 rownames(tsne7DT) <- rownames(SigMetabolites)
-pheatmap(tsne7DT, 
-         main = "tSNE-heatmap")
+tSNE_Heatmap <- pheatmap(tsne7DT, 
+                         main = "tSNE-heatmap")
 
 # Hierarcical Clustering
 tSNE_hclustering <- cutree(hclust(dist(tsne7DT), 
                                   method = "average"),
-                           k = 3)
+                           k = 2)
 
 tSNE_df <- as.data.frame(tSNE_pp7$Y)
 rownames(tSNE_df) <- rownames(SigMetabolites)
 colnames(tSNE_df) <- c("Dim1", "Dim2")
 
-# Plotting 
-tSNE_hClustering_Plot <- tSNE_df %>%
+# Data Cleaning
+set.seed(490)
+tSNE_kmClustering_dt <- tSNE_df %>%
         rownames_to_column(var = "Metabolite") %>%
-        mutate(hClustering = factor(tSNE_hclustering)) %>%
-        ggplot(aes(x = Dim1, 
-                   y = Dim2, 
-                   color = hClustering)) + 
-        geom_point(size = 2) + 
+        mutate(tSNE_kmclustering = factor(kmeans(tSNE_df, 
+                                                 centers = 2)$cluster))
+
+# Plotting (w ggfortify and cluster package)
+set.seed(490)
+tSNE_kmClustering_Plot <- 
+        autoplot(stats::kmeans(tSNE_kmClustering_dt[, 2:3], 2),
+                 data = tSNE_kmClustering_dt,
+                 frame = TRUE) +
         theme_bw() + 
-        ggtitle("tSNE and Hierarchical Clustering")
+        ggtitle("tSNE and K-Means Clustering") +
+        xlab("Dim1 (89.1%)") +
+        ylab("Dim2 (10.9%)")
+
+
+
+# Data Cleaning for comparing clustering between PCA and tSNE
+PCA_tSNE_Table <- inner_join(PCA_kmclustering_dt,
+                             tSNE_kmClustering_dt,
+                             by = "Metabolite") 
+        
+CombinedCluster <- as.data.table(table(PCA_tSNE_Table$PCA_kmClustering, 
+                                       PCA_tSNE_Table$tSNE_kmclustering))
+
+colnames(CombinedCluster) <- c("PCA",
+                               "tSNE",
+                               "Metabolite_Number")
+
+# Plotting for comparing clustering between PCA and tSNE
+CombinedCluster_plot <- 
+        ggplot(CombinedCluster,
+               aes(x = PCA, y = tSNE, label = Metabolite_Number)) + 
+        geom_tile(data = CombinedCluster, 
+                  aes(fill = Metabolite_Number),
+                  alpha = 0.7) + 
+        geom_text(size = 15) +
+        theme_bw() + 
+        ggtitle("Number of Metabolites Clustered by PCA and tSNE") + 
+        xlab("Cluster by PCA") +
+        ylab("Cluster by tSNE")
+           

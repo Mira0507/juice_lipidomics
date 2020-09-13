@@ -451,10 +451,6 @@ PCA_Scree <- ggplot(pca_dt, aes(x = Principal_Component,
 PCA_Heatmap <- pheatmap(pca$x[,1:2], 
                         main = "PCA-heatmap")
 
-# Hierarcical Clustering
-PCA_hclustering <- cutree(hclust(dist(pca$x[,1:2]), 
-                                 method = "average"),
-                          k = 2)
 
 
 # Data Cleaning
@@ -514,11 +510,7 @@ rownames(tsne7DT) <- rownames(SigMetabolites)
 tSNE_Heatmap <- pheatmap(tsne7DT, 
                          main = "tSNE-heatmap")
 
-# Hierarcical Clustering
-tSNE_hclustering <- cutree(hclust(dist(tsne7DT), 
-                                  method = "average"),
-                           k = 2)
-
+# Data Cleaning
 tSNE_df <- as.data.frame(tSNE_pp7$Y)
 rownames(tSNE_df) <- rownames(SigMetabolites)
 colnames(tSNE_df) <- c("Dim1", "Dim2")
@@ -538,9 +530,8 @@ tSNE_kmClustering_Plot <-
                  frame = TRUE) +
         theme_bw() + 
         ggtitle("tSNE and K-Means Clustering") +
-        xlab("Dim1 (89.1%)") +
-        ylab("Dim2 (10.9%)")
-
+        xlab("Dim1 (89.09%)") +
+        ylab("Dim2 (10.91%)")
 
 
 # Data Cleaning for comparing clustering between PCA and tSNE

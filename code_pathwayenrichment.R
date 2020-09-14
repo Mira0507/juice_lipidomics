@@ -4,7 +4,7 @@
 
 
 library(FELLA)
-library(formattable)
+
 
 
 PathwayEnrichment_fn <- function(keggID, 
@@ -75,12 +75,15 @@ getExcluded(Analysis_Ap)
 getExcluded(Anakysis_Cr)
 
 # Pathway map
-FellaMap_Apple <- plot(Analysis_Ap, 
-                       method = "diffusion",
-                       data = FellaData_Apple,
-                       nlimit = 150,
-                       vertex.label.cex = 0.5)
-
+jpeg("FellaMap_Apple.jpeg",
+     width = 500, 
+     height = 500, quality = 1000)
+plot(Analysis_Ap, 
+     method = "diffusion",
+     data = FellaData_Apple,
+     nlimit = 150,
+     vertex.label.cex = 0.5)
+dev.off()
 
 
 PathwayTable_fn <- function(cpd, fella, analysis) {

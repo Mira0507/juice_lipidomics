@@ -559,3 +559,17 @@ CombinedCluster_plot <-
         xlab("Cluster by PCA") +
         ylab("Cluster by tSNE")
 
+library(formattable)
+
+CombinedCluster_Compare <- PCA_tSNE_Table[, c("Metabolite",
+                                              "PCA_kmClustering",
+                                              "tSNE_kmclustering")] %>%
+        arrange(PCA_kmClustering)
+        
+color_formatter <- formatter("span",
+                             style = x ~ style(color = ifelse(x == "1",
+                                                              "red", "blue")))
+
+PCA_tSNE_MetaboliteTable <- formattable(CombinedCluster_Compare,
+                                        list(PCA_kmClustering = color_formatter,
+                                             tSNE_kmclustering = color_formatter))
